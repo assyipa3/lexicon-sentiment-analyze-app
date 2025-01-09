@@ -2,6 +2,9 @@
 /flaskr/__pycache__/
 /flaskr/node_modules/
 /flaskr/static/wordcloud.png
+/flaskr/static/positive_wordcloud.png
+/flaskr/static/negative_wordcloud.png
+/flaskr/static/neutral_wordcloud.png
 /flaskr/static/dist/css/output.css
 /instance/flaskr.sqlite
 /storage/temp/csv/*

@@ -8,7 +8,7 @@
        <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
           <p class="text-2xl text-gray-400 dark:text-gray-500">Total Data</p>
           <h1 class="text-4xl text-gray-700 dark:text-gray-300 ml-4">
-             {{ total_comments}}
+             {{ total_comments }}
           </h1>   
        </div>
        <div class="flex items-center justify-center h-24 rounded bg-gray-50 dark:bg-gray-800">
@@ -37,8 +37,22 @@
         </div>
         <div class="items-center justify-center rounded bg-gray-50 h-auto dark:bg-gray-800">
           <div class="py-6 px-4">
-            <h5 class="text-xl font-bold text-gray-900 dark:text-white">Wordcloud</h5>
-            <img src="{{ url_for('static', filename='wordcloud.png') }}" alt="Wordcloud">
+            <h5 class="text-xl font-bold text-gray-900 dark:text-white">Wordcloud - Positive</h5>
+            <img src="{{ url_for('static', filename='positive_wordcloud.png') }}" alt="Positive Wordcloud">
+          </div>
+        </div>
+    </div>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="items-center justify-center rounded bg-gray-50 h-auto dark:bg-gray-800">
+          <div class="py-6 px-4">
+            <h5 class="text-xl font-bold text-gray-900 dark:text-white">Wordcloud - Negative</h5>
+            <img src="{{ url_for('static', filename='negative_wordcloud.png') }}" alt="Negative Wordcloud">
+          </div>
+        </div>
+        <div class="items-center justify-center rounded bg-gray-50 h-auto dark:bg-gray-800">
+          <div class="py-6 px-4">
+            <h5 class="text-xl font-bold text-gray-900 dark:text-white">Wordcloud - Neutral</h5>
+            <img src="{{ url_for('static', filename='neutral_wordcloud.png') }}" alt="Neutral Wordcloud">
           </div>
         </div>
     </div>
@@ -109,4 +123,3 @@
   }
 </script>
 {% endblock %}
-
