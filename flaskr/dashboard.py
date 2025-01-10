@@ -7,18 +7,57 @@ from flaskr.db import get_db
 from wordcloud import WordCloud
 import matplotlib.pyplot as plt
 import os
+import pandas as pd
 
 bp = Blueprint('dashboard', __name__)
 
-def generate_wordcloud(comments):
-    if not comments:
-        print("No comments to generate wordcloud")
+def load_sentiment_dictionary():
+    """Memuat file kamus sentimen."""
+    base_dir = os.path.dirname(os.path.abspath(__file__))  # Mendapatkan direktori file dashboard.py
+    positive_path = os.path.join(base_dir, '../positive.tsv')  # Path ke file positive.tsv
+    negative_path = os.path.join(base_dir, '../negative.tsv')  # Path ke file negative.tsv
+
+    # Membaca file dengan konversi kolom weight ke float
+    positive_words = pd.read_csv(positive_path, sep='\t', names=['word', 'weight'])
+    positive_words['weight'] = pd.to_numeric(positive_words['weight'], errors='coerce')  # Konversi ke float
+    
+    negative_words = pd.read_csv(negative_path, sep='\t', names=['word', 'weight'])
+    negative_words['weight'] = pd.to_numeric(negative_words['weight'], errors='coerce')  # Konversi ke float
+    
+    return (
+        positive_words.set_index('word')['weight'].to_dict(), 
+        negative_words.set_index('word')['weight'].to_dict()
+    )
+
+
+def classify_words(comments, positive_dict, negative_dict):
+    """Mengklasifikasikan kata-kata dalam komentar menjadi positif, negatif, atau netral."""
+    positive_words = []
+    negative_words = []
+    neutral_words = []
+
+    for comment in comments:
+        words = comment['preprocessed_comment'].split()
+        for word in words:
+            if word in positive_dict:
+                positive_words.append((word, positive_dict[word]))
+            elif word in negative_dict:
+                negative_words.append((word, negative_dict[word]))
+            else:
+                neutral_words.append((word, 1))  # Default weight untuk kata netral
+
+    return positive_words, negative_words, neutral_words
+
+def generate_wordcloud(word_list, filename):
+    """Menghasilkan WordCloud dari daftar kata dan menyimpannya ke file."""
+    if not word_list:
+        print(f"No words to generate wordcloud for {filename}")
         return
 
-    text = ' '.join(comment['preprocessed_comment'] for comment in comments)
-    wordcloud = WordCloud(width=800, height=400, background_color='white').generate(text)
+    word_freq = {word: weight for word, weight in word_list}
+    wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(word_freq)
 
-    wordcloud_path = os.path.join('flaskr', 'static', 'wordcloud.png')
+    wordcloud_path = os.path.join('flaskr', 'static', filename)
     wordcloud.to_file(wordcloud_path)
 
 @bp.route('/')
@@ -45,8 +84,17 @@ def index():
     total_neutral = db.execute(
         "SELECT COUNT(*) FROM comments WHERE sentiment_label = 'neutral'"
     ).fetchone()[0]
-    
-    generate_wordcloud(sentiments)
+
+    # Memuat kamus sentimen
+    positive_dict, negative_dict = load_sentiment_dictionary()
+
+    # Mengklasifikasikan kata-kata
+    positive_words, negative_words, neutral_words = classify_words(sentiments, positive_dict, negative_dict)
+
+    # Membuat WordCloud
+    generate_wordcloud(positive_words, 'positive_wordcloud.png')
+    generate_wordcloud(negative_words, 'negative_wordcloud.png')
+    generate_wordcloud(neutral_words, 'neutral_wordcloud.png')
 
     return render_template(
         'dashboard/index.html', 
